@@ -3,5 +3,4 @@ scikit-learn
 numpy
 pandas
 joblib
-random
 gunicorn
