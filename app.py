@@ -7,8 +7,10 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import MinMaxScaler
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 def import_data(url):
     
@@ -59,5 +61,5 @@ def main(sample_input):
     return detection(k,features,sample_input_scaled,X_train,y_train)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8080)
 
