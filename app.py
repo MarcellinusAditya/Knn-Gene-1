@@ -24,7 +24,6 @@ def data(url):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     scaler=MinMaxScaler()
     scaler.fit(X_train)
-    joblib.dump(scaler,"scaler.pkl")
     X_train=scaler.transform(X_train)
     X_test=scaler.transform(X_test)
     X_test = np.clip(X_test, 0, 1)
@@ -38,22 +37,46 @@ def detection(k,features,input,x_train,y_train):
     predict=model.predict(selected_input)
     return predict
 
+@app.route("/get-data", methods=["GET"])
+def get_data():
+    k=joblib.load("k.pkl")
+    features=joblib.load("selected_features.pkl")
+    accuracy=joblib.load("best_fitness.pkl")
+    return jsonify(
+        {
+            "k": k,
+            "features": features,
+            "accuracy": accuracy
+        }
+    )
+
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.json
-    input=np.array([data["features"]])
+    input=np.array([data["input"]])
     input=np.clip(input, 0, 1)
-    result=main(input)
+    k=data['k']
+    features=data['features']
+    result=main(input, k, features)
     result="Diabetes" if result[0] == 1 else "Sehat"
     return jsonify({"prediksi": result})
 
-def main(sample_input):
-    url = "dataset/dataset_diabetes_1_test.csv"
+@app.route("/genetika", methods=["GET"])
+def genetika():
+    url = "dataset/dataset_diabetes_1.csv"
     X_train, X_test, y_train, y_test=data(url)
-    # k,features=KnnGenetika.genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=90, generations=10, k_max=31, mutation_rate=0.4)
-    k=joblib.load("k.pkl")
-    features=joblib.load("selected_features.pkl")
-    # sample_input = np.array([[2, 110, 74, 29, 125, 32.4, 0.698, 27]])
+    k,features,accuracy=KnnGenetika.genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=120, generations=100, k_max=31, mutation_rate=0.4)
+    return jsonify({
+            "k": k,
+            "features": features,
+            "accuracy": accuracy
+        })
+
+def main(sample_input, k, features):
+    url = "dataset/dataset_diabetes_1.csv"
+    X_train, X_test, y_train, y_test=data(url)
+    # k=joblib.load("k.pkl")
+    # features=joblib.load("selected_features.pkl")
     scaler=joblib.load("scaler.pkl")
     sample_input_scaled=scaler.transform(sample_input)
     sample_input_scaled=np.clip(sample_input_scaled, 0, 1)
@@ -61,5 +84,5 @@ def main(sample_input):
     return detection(k,features,sample_input_scaled,X_train,y_train)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)
 

@@ -43,7 +43,10 @@ def evaluate_fitness(chromosome, X_train, X_test, y_train, y_test):
     return accuracy_score(y_test, y_pred)
 
 # Fungsi crossover
-def crossover(parent1, parent2):
+def crossover(parent1, parent2, crossover_rate=0.8):
+    if random.random() > crossover_rate:
+        # Jika tidak memenuhi crossover rate, kembalikan parent tanpa perubahan
+        return parent1, parent2
     point = random.randint(1, len(parent1) - 1)
     offspring1 = parent1[:point] + parent2[point:]
     offspring2 = parent2[:point] + parent1[point:]
@@ -94,14 +97,16 @@ def genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=10, generations
     print(f"Best K: {k}")
     print(f"Selected Features: {selected_features}")
     print(f"Best Fitness (Accuracy): {best_fitness:.4f}")
-    return k,selected_features
+    # joblib.dump(round(best_fitness, 4),"best_fitness.pkl")
+    accuracy=round(best_fitness, 4)
+    return k,selected_features,accuracy
 
 
 
 # Main Program
 def main():
     
-    url = "dataset/dataset_diabetes_1_test.csv"
+    url = "dataset/dataset_diabetes_1.csv"
     df = pd.read_csv(url)
     X = df.iloc[:, :-1].values  # 8 fitur
     y = df.iloc[:, -1].values   # Label
@@ -109,7 +114,7 @@ def main():
     scaler=MinMaxScaler()
     
     # Split dataset menjadi training dan testing
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     scaler.fit(X_train)
     X_train=scaler.transform(X_train)
@@ -125,12 +130,12 @@ def main():
     print("\nDistribusi kelas pada dataset pengujian:")
     print(pd.Series(y_test).value_counts())
     # Jalankan Algoritma Genetika untuk optimasi KNN
-    k,selected_features=genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=90, generations=100, k_max=31, mutation_rate=0.4)
+    k,selected_features,accuracy=genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=120, generations=100, k_max=31, mutation_rate=0.4)
 
-    joblib.dump(k,"k.pkl")
-    joblib.dump(selected_features,"selected_features.pkl")
+    # joblib.dump(k,"k_2.pkl")
+    # joblib.dump(selected_features,"selected_features_2.pkl")
 
-    return k,selected_features
+    return k,selected_features,accuracy
 
 if __name__ == "__main__":
     main()
