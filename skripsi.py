@@ -60,7 +60,7 @@ def mutation(chromosome, mutation_rate=0.1):
     return chromosome
 
 # Fungsi seleksi turnamen
-def tournament_selection(population, fitness_scores, tournament_size=3):
+def tournament_selection(population, fitness_scores, tournament_size=2):
     selected = random.sample(list(zip(population, fitness_scores)), tournament_size)
     selected = sorted(selected, key=lambda x: x[1], reverse=True)
     return selected[0][0]  # Kromosom dengan fitness terbaik
@@ -130,10 +130,7 @@ def main():
     print("\nDistribusi kelas pada dataset pengujian:")
     print(pd.Series(y_test).value_counts())
     # Jalankan Algoritma Genetika untuk optimasi KNN
-    k,selected_features,accuracy=genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=120, generations=100, k_max=31, mutation_rate=0.4)
-
-    # joblib.dump(k,"k_2.pkl")
-    # joblib.dump(selected_features,"selected_features_2.pkl")
+    k,selected_features,accuracy=genetic_algorithm(X_train, X_test, y_train, y_test, pop_size=100, generations=100, k_max=31, mutation_rate=0.4)
 
     return k,selected_features,accuracy
 

@@ -54,7 +54,6 @@ def get_data():
 def predict():
     data = request.json
     input=np.array([data["input"]])
-    input=np.clip(input, 0, 1)
     k=data['k']
     features=data['features']
     result=main(input, k, features)
@@ -80,7 +79,7 @@ def main(sample_input, k, features):
     scaler=joblib.load("scaler.pkl")
     sample_input_scaled=scaler.transform(sample_input)
     sample_input_scaled=np.clip(sample_input_scaled, 0, 1)
-
+    
     return detection(k,features,sample_input_scaled,X_train,y_train)
 
 if __name__ == "__main__":
